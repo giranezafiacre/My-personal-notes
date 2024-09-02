@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "588771078309",
+    "firebase_url": "https://fiacre-brand.firebaseio.com",
+    "project_id": "fiacre-brand",
+    "storage_bucket": "fiacre-brand.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:588771078309:android:f7cf540941393c3d6c9d4c",
+        "android_client_info": {
+          "package_name": "com.fiacregiraneza.mypersonalnotes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "588771078309-791dp50efu89ha3ofe77l56vdotcf1os.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAojWAvo98RC-XPLl8tEB5QK7jbmCI-NMw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "588771078309-791dp50efu89ha3ofe77l56vdotcf1os.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
