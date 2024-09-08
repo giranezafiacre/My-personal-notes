@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as devtools show log;
-
 import 'package:mypersonalnotes/constants/routes.dart';
+import 'package:mypersonalnotes/utility/show_error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -67,23 +66,58 @@ class _RegisterViewState extends State<RegisterView> {
               final email = _email1.text;
               final password = _password.text;
               try {
-                final userCredential = await FirebaseAuth.instance
-                    .createUserWithEmailAndPassword(
-                        email: email, password: password);
-                print(userCredential);
+                await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                  email: email,
+                  password: password,
+                );
+                final user = FirebaseAuth.instance.currentUser;
+                await user?.sendEmailVerification();
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil(verifyEmailRoute, (_) => false);
               } on FirebaseAuthException catch (e) {
                 switch (e.code) {
                   case 'weak-password':
+                    if (context.mounted) {
+                      await showErroDialog(
+                        context,
+                        'Weak password',
+                      );
+                    }
                     print('Fiacre weak password');
                     break;
                   case 'email-already-in-use':
+                    if (context.mounted) {
+                      await showErroDialog(
+                        context,
+                        'email is already in use',
+                      );
+                    }
                     print('Fiacre you have already used this email');
                     break;
                   case 'invalid-email':
+                    if (context.mounted) {
+                      await showErroDialog(
+                        context,
+                        'invalid email',
+                      );
+                    }
                     print('Fiacre this email is invalid');
                     break;
                   default:
+                    if (context.mounted) {
+                      await showErroDialog(
+                        context,
+                        'Error: ${e.code}',
+                      );
+                    }
                     print('An unexpected error occurred: ${e.code}');
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  await showErroDialog(
+                    context,
+                    'Error: ${e.toString()}',
+                  );
                 }
               }
             },

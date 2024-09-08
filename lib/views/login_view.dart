@@ -42,7 +42,10 @@ class _LoginViewState extends State<LoginView> {
             color: Color.fromARGB(255, 244, 245, 248), // Text color in AppBar
           ),
         ),
-        backgroundColor: Color.fromARGB(255, 94, 117, 247),
+        backgroundColor: const Color.fromARGB(255, 94, 117, 247),
+        iconTheme: const IconThemeData(
+          color: Colors.white, // Sets the back button color to white
+        ),
       ),
       body: Column(
         children: [
