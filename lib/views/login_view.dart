@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:developer' as devtools show log;
 
 import 'package:mypersonalnotes/constants/routes.dart';
+import 'package:mypersonalnotes/utility/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -37,9 +38,10 @@ class _LoginViewState extends State<LoginView> {
       appBar: AppBar(
         title: const Text(
           'Login',
-           style: TextStyle(
+          style: TextStyle(
             color: Color.fromARGB(255, 244, 245, 248), // Text color in AppBar
-          ),),
+          ),
+        ),
         backgroundColor: Color.fromARGB(255, 94, 117, 247),
       ),
       body: Column(
@@ -49,7 +51,8 @@ class _LoginViewState extends State<LoginView> {
             autocorrect: false,
             keyboardType: TextInputType.emailAddress,
             enableSuggestions: false,
-            decoration: const InputDecoration(hintText: 'Please enter you email'),
+            decoration:
+                const InputDecoration(hintText: 'Please enter you email'),
           ),
           TextField(
             controller: _password,
@@ -63,27 +66,37 @@ class _LoginViewState extends State<LoginView> {
             onPressed: () async {
               final email = _email1.text;
               final password = _password.text;
-      
+
               try {
                 final userCredential = await FirebaseAuth.instance
                     .signInWithEmailAndPassword(
-                      email: email, 
-                      password: password);
+                        email: email, password: password);
                 devtools.log(userCredential.toString());
                 Navigator.of(context)
-                        .pushNamedAndRemoveUntil(notesRoute, (_) => false);
+                    .pushNamedAndRemoveUntil(notesRoute, (_) => false);
               } on FirebaseAuthException catch (e) {
                 devtools.log('---------------------------');
                 devtools.log(e.code.toString());
                 if (e.code == 'user-not-found') {
+                  await showErroDialog(context, 'User Not Found');
                   devtools.log('not authenticated');
                 } else if (e.code == 'wrong-password') {
+                  await showErroDialog(context, 'Wrong credentials');
                   devtools.log('wrong-password');
+                } else {
+                  await showErroDialog(
+                      context, 'Error: ${e.code}');
                 }
-      
+
                 devtools.log('---------------------------');
                 devtools.log(e.message.toString());
                 devtools.log('---------------------------');
+              }catch(e){
+                
+                 await showErroDialog(
+                      context, 
+                      'Error: ${e.toString()}',);
+
               }
             },
             child: const Text('Login'),
