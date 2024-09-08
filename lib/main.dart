@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:mypersonalnotes/constants/routes.dart';
 import 'package:mypersonalnotes/firebase_options.dart';
 import 'package:mypersonalnotes/views/login_view.dart';
 import 'package:mypersonalnotes/views/register_view.dart';
@@ -18,9 +19,9 @@ void main() {
     ),
     home: const HomePage(),
     routes: {
-      '/login/': (context) => const LoginView(),
-      '/register/': (context) => const RegisterView(),
-      '/notes/': (context) => const NotesView(),
+      loginRoute: (context) => const LoginView(),
+      registerRoute: (context) => const RegisterView(),
+      notesRoute: (context) => const NotesView(),
     },
   ));
 }
@@ -68,12 +69,6 @@ class _NotesViewState extends State<NotesView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Main UI',
-          style: TextStyle(
-            color: Color.fromARGB(255, 244, 245, 248), // Text color in AppBar
-          ),
-        ),
         actions: [
           PopupMenuButton<MenuAction>(
             icon: const Icon(
@@ -88,7 +83,7 @@ class _NotesViewState extends State<NotesView> {
                   if (shouldLogout) {
                     await FirebaseAuth.instance.signOut();
                     Navigator.of(context)
-                        .pushNamedAndRemoveUntil('/login/', (_) => false);
+                        .pushNamedAndRemoveUntil(loginRoute, (_) => false);
                   }
                   break;
                 // TODO: Handle this case.
@@ -105,7 +100,14 @@ class _NotesViewState extends State<NotesView> {
             },
           )
         ],
-        shadowColor: const Color.fromARGB(255, 39, 54, 63),
+       
+        title: const Text(
+          'Main UI',
+          style: TextStyle(
+            color: Color.fromARGB(255, 244, 245, 248), // Text color in AppBar
+          ),
+        ),
+         shadowColor: const Color.fromARGB(255, 39, 54, 63),
         backgroundColor: const Color.fromARGB(255, 94, 117, 247),
         elevation: 4.0,
       ),
