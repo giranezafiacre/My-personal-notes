@@ -24,6 +24,12 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
         iconTheme: const IconThemeData(
           color: Colors.white, // Sets the back button color to white
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back), // The back button icon
+          onPressed: () {
+            Navigator.of(context).pop(); // Go back to the previous screen
+          },
+        ),
       ),
       body: Column(
         children: [

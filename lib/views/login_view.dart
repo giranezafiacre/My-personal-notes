@@ -71,12 +71,18 @@ class _LoginViewState extends State<LoginView> {
               final password = _password.text;
 
               try {
-                final userCredential = await FirebaseAuth.instance
-                    .signInWithEmailAndPassword(
-                        email: email, password: password);
-                devtools.log(userCredential.toString());
-                Navigator.of(context)
-                    .pushNamedAndRemoveUntil(notesRoute, (_) => false);
+                await FirebaseAuth.instance.signInWithEmailAndPassword(
+                    email: email, password: password);
+                final user = FirebaseAuth.instance.currentUser;
+                if (user?.emailVerified == true) {
+                  // user email verified
+                  Navigator.of(context)
+                      .pushNamedAndRemoveUntil(notesRoute, (_) => false);
+                } else {
+                  // user email not verified
+                  Navigator.of(context)
+                      .pushNamedAndRemoveUntil(verifyEmailRoute, (_) => false);
+                }
               } on FirebaseAuthException catch (e) {
                 devtools.log('---------------------------');
                 devtools.log(e.code.toString());
@@ -87,19 +93,17 @@ class _LoginViewState extends State<LoginView> {
                   await showErroDialog(context, 'Wrong credentials');
                   devtools.log('wrong-password');
                 } else {
-                  await showErroDialog(
-                      context, 'Error: ${e.code}');
+                  await showErroDialog(context, 'Error: ${e.code}');
                 }
 
                 devtools.log('---------------------------');
                 devtools.log(e.message.toString());
                 devtools.log('---------------------------');
-              }catch(e){
-                
-                 await showErroDialog(
-                      context, 
-                      'Error: ${e.toString()}',);
-
+              } catch (e) {
+                await showErroDialog(
+                  context,
+                  'Error: ${e.toString()}',
+                );
               }
             },
             child: const Text('Login'),

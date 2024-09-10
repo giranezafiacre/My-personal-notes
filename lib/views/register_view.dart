@@ -83,7 +83,6 @@ class _RegisterViewState extends State<RegisterView> {
                         'Weak password',
                       );
                     }
-                    print('Fiacre weak password');
                     break;
                   case 'email-already-in-use':
                     if (context.mounted) {
@@ -92,7 +91,6 @@ class _RegisterViewState extends State<RegisterView> {
                         'email is already in use',
                       );
                     }
-                    print('Fiacre you have already used this email');
                     break;
                   case 'invalid-email':
                     if (context.mounted) {
@@ -101,7 +99,6 @@ class _RegisterViewState extends State<RegisterView> {
                         'invalid email',
                       );
                     }
-                    print('Fiacre this email is invalid');
                     break;
                   default:
                     if (context.mounted) {
@@ -110,7 +107,6 @@ class _RegisterViewState extends State<RegisterView> {
                         'Error: ${e.code}',
                       );
                     }
-                    print('An unexpected error occurred: ${e.code}');
                 }
               } catch (e) {
                 if (context.mounted) {
