@@ -42,7 +42,7 @@ class _RegisterViewState extends State<RegisterView> {
             color: Color.fromARGB(255, 244, 245, 248), // Text color in AppBar
           ),
         ),
-        backgroundColor: Color.fromARGB(255, 94, 117, 247),
+        backgroundColor: const Color.fromARGB(255, 94, 117, 247),
       ),
       body: Column(
         children: [

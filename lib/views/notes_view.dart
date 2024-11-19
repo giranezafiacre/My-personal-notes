@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mypersonalnotes/constants/routes.dart';
 import 'package:mypersonalnotes/enums/menu_action.dart';
 import 'package:mypersonalnotes/services/auth/auth_service.dart';
+import 'package:mypersonalnotes/services/crud/notes_services.dart';
 
 class NotesView extends StatefulWidget {
   const NotesView({super.key});
@@ -11,6 +12,21 @@ class NotesView extends StatefulWidget {
 }
 
 class _NotesViewState extends State<NotesView> {
+  late final NotesService _notesService;
+  String? get userEmail => AuthService.firebase().currentUser!.email;
+
+  @override
+  void initState() {
+    _notesService = NotesService();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _notesService.closeDb();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,7 +70,32 @@ class _NotesViewState extends State<NotesView> {
         backgroundColor: const Color.fromARGB(255, 94, 117, 247),
         elevation: 4.0,
       ),
-      body: const Text('Hello World you are verified'),
+      body: FutureBuilder(
+          future: _notesService.getOrCreateUser(email: userEmail ?? ''),
+          builder: (context, snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.done:
+                return StreamBuilder(
+                    stream: _notesService.allNotes,
+                    builder: (context, snapshot) {
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.none:
+                        // TODO: Handle this case.
+                        case ConnectionState.waiting:
+                          return Text('Waiting for all notes...');
+
+                        case ConnectionState.active:
+                        // TODO: Handle this case.
+                        case ConnectionState.done:
+                        // TODO: Handle this case.
+                        default:
+                          return CircularProgressIndicator();
+                      }
+                    });
+              default:
+                return CircularProgressIndicator();
+            }
+          }),
     );
   }
 }

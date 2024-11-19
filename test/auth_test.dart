@@ -29,7 +29,7 @@ void main() {
         await provider.initialize();
         expect(provider.isInitialized, true);
       },
-      timeout: const Timeout(const Duration(seconds: 2)),
+      timeout: const Timeout(Duration(seconds: 2)),
     );
     test('Create user should delegate to login function', () async {
       final badEmailUser = provider.createUser(
