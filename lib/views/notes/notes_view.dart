@@ -32,6 +32,11 @@ class _NotesViewState extends State<NotesView> {
     return Scaffold(
       appBar: AppBar(
         actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed(newNoteRoute);
+              },
+              icon: const Icon(Icons.add,color: Colors.white,)),
           PopupMenuButton<MenuAction>(
             icon: const Icon(
               Icons.more_vert,
@@ -48,6 +53,8 @@ class _NotesViewState extends State<NotesView> {
                   }
                   break;
                 // TODO: Handle this case.
+                case MenuAction.add:
+                // TODO: Handle this case.
               }
             },
             itemBuilder: (context) {
@@ -61,7 +68,7 @@ class _NotesViewState extends State<NotesView> {
           )
         ],
         title: const Text(
-          'Main UI',
+          'Your Notes',
           style: TextStyle(
             color: Color.fromARGB(255, 244, 245, 248), // Text color in AppBar
           ),

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mypersonalnotes/constants/routes.dart';
 import 'package:mypersonalnotes/services/auth/auth_service.dart';
 import 'package:mypersonalnotes/views/login_view.dart';
-import 'package:mypersonalnotes/views/notes_view.dart';
+import 'package:mypersonalnotes/views/notes/new_note_view.dart';
+import 'package:mypersonalnotes/views/notes/notes_view.dart';
 import 'package:mypersonalnotes/views/register_view.dart';
 import 'package:mypersonalnotes/views/verify_email_view.dart';
 
@@ -20,10 +21,12 @@ void main() {
       loginRoute: (context) => const LoginView(),
       registerRoute: (context) => const RegisterView(),
       notesRoute: (context) => const NotesView(),
-      verifyEmailRoute: (context) => const VerifyEmailView()
+      verifyEmailRoute: (context) => const VerifyEmailView(),
+      newNoteRoute:(context)=>const NewNoteView()
     },
   ));
 }
+
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
