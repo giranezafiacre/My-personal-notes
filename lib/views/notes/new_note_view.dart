@@ -13,72 +13,55 @@ class _NewNoteViewState extends State<NewNoteView> {
   DatabaseNote? _note;
   late final NotesService _notesService;
   late final TextEditingController _textController;
+  late final Future<DatabaseNote> _noteFuture;
 
   @override
   void initState() {
     super.initState();
     _notesService = NotesService();
     _textController = TextEditingController();
-    createNewNote().then((note) {
-      setState(() {
-        _note = note;
-        _setupTextControllerListener();
-      });
-    }).catchError((e) {
-      // Handle error appropriately
+    _noteFuture = createOrGetNote();
+    _textController.addListener(_textControllerListener);
+  }
+
+  Future<DatabaseNote> createOrGetNote() async {
+    if (_note != null) return _note!;
+
+    final currentUser = AuthService.firebase().currentUser!;
+    final email = currentUser.email!;
+    final owner = await _notesService.getUser(email: email);
+    final newNote = await _notesService.createNote(owner: owner);
+
+    setState(() {
+      _note = newNote;
     });
+
+    return newNote;
   }
 
   void _textControllerListener() async {
     final note = _note;
-    if (note == null) {
-      return;
-    }
-    final text = _textController.text;
-    await _notesService.updateNote(
-      note: note,
-      text: text,
-    );
-  }
+    if (note == null) return;
 
-  void _setupTextControllerListener() {
-    _textController.removeListener(_textControllerListener);
-    _textController.addListener(_textControllerListener);
-  }
-
-  Future<DatabaseNote> createNewNote() async {
-    final existingNote = _note;
-    if (existingNote != null) {
-      return existingNote;
+    final newText = _textController.text;
+    if (note.text != newText) {
+      await _notesService.updateNote(
+        note: note,
+        text: newText,
+      );
     }
-    final currentUser = AuthService.firebase().currentUser!;
-    final email = currentUser.email!;
-    final owner = await _notesService.getUser(email: email);
-    return await _notesService.createNote(owner: owner);
   }
 
   void _deleteNoteIfTextIsEmpty() {
-    final note = _note;
-    if (_textController.text.isEmpty && note != null) {
-      _notesService.deleteNote(id: note.id);
-    }
-  }
-
-  void _savaNoteIfTextNotEmpty() async {
-    final note = _note;
-    final text = _textController.text;
-    if (note != null && text.isNotEmpty) {
-      await _notesService.updateNote(
-        note: note,
-        text: text,
-      );
+    if (_note != null && _textController.text.isEmpty) {
+      _notesService.deleteNote(id: _note!.id);
     }
   }
 
   @override
   void dispose() {
     _deleteNoteIfTextIsEmpty();
-    _savaNoteIfTextNotEmpty();
+    _textController.removeListener(_textControllerListener);
     _textController.dispose();
     super.dispose();
   }
@@ -90,43 +73,45 @@ class _NewNoteViewState extends State<NewNoteView> {
         title: const Text(
           'New Note',
           style: TextStyle(
-            color: Color.fromARGB(255, 244, 245, 248), // Text color in AppBar
+            color: Color.fromARGB(255, 244, 245, 248),
           ),
         ),
         backgroundColor: const Color.fromARGB(255, 94, 117, 247),
         elevation: 4.0,
         iconTheme: const IconThemeData(
-          color: Color.fromARGB(255, 244, 245, 248), // Back icon color
+          color: Color.fromARGB(255, 244, 245, 248),
         ),
       ),
-      body: FutureBuilder(
-        future: createNewNote(),
+      body: FutureBuilder<DatabaseNote>(
+        future: _noteFuture,
         builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.done:
-              if (snapshot.hasError) {
-                return Center(
-                  child: Text('Error: ${snapshot.error}'),
-                );
-              }
-              if (snapshot.hasData) {
-                _note = snapshot.data as DatabaseNote;
-                _setupTextControllerListener();
-                return TextField(
-                  controller: _textController,
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
-                  decoration: const InputDecoration(
-                    hintText:'Start Typing your note...'
-                  ),
-                );
-              } else {
-                return const Center(
-                  child: Text('Failed to load note'),
-                );
-              }
-            default:
-              return const CircularProgressIndicator();
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return Center(
+                child: Text('Error: ${snapshot.error}'),
+              );
+            } else if (snapshot.hasData) {
+              final note = snapshot.data!;
+              _note = note; // Update the local state
+              _textController.text = note.text;
+
+              return TextField(
+                controller: _textController,
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+                decoration: const InputDecoration(
+                  hintText: 'Start typing your note...',
+                ),
+              );
+            } else {
+              return const Center(
+                child: Text('Failed to load note'),
+              );
+            }
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
           }
         },
       ),

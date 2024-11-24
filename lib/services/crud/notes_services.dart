@@ -12,11 +12,14 @@ class NotesService {
   List<DatabaseNote> _notes = [];
 
   static final NotesService _shared = NotesService._sharedInstance();
-  NotesService._sharedInstance();
+  NotesService._sharedInstance() {
+    _notesStreamController = StreamController<List<DatabaseNote>>.broadcast(
+      onListen: () => {_notesStreamController.add(_notes)},
+    );
+  }
   factory NotesService() => _shared;
 
-  final _notesStreamController =
-      StreamController<List<DatabaseNote>>.broadcast();
+  late final StreamController<List<DatabaseNote>> _notesStreamController;
   Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
 
   Future<DatabaseUser> getOrCreateUser({required String email}) async {
@@ -35,32 +38,6 @@ class NotesService {
     final allNotes = await getAllNotes();
     _notes = allNotes.toList();
     _notesStreamController.add(_notes);
-  }
-
-  Future<DatabaseNote> updateNote({
-    required DatabaseNote note,
-    required String text,
-  }) async {
-    await _ensureDbIsOpen();
-    final db = _getDatabaseOrThrow();
-
-    // make sure note exists
-    await getNote(id: note.id);
-
-    // update db
-    final updatesCount = await db.update(noteTable, {
-      textColumn: text,
-      isSyncedWithCloudColumn: 0,
-    });
-    if (updatesCount == 0) {
-      throw CouldNotUpdateNote();
-    } else {
-      final updatedNote = await getNote(id: note.id);
-      _notes.removeWhere((note) => note.id == updatedNote);
-      _notes.add(updatedNote);
-      _notesStreamController.add((_notes));
-      return updatedNote;
-    }
   }
 
   Future<Iterable<DatabaseNote>> getAllNotes() async {
@@ -121,11 +98,42 @@ class NotesService {
     }
   }
 
+  Future<DatabaseNote> updateNote({
+    required DatabaseNote note,
+    required String text,
+  }) async {
+    await _ensureDbIsOpen();
+    final db = _getDatabaseOrThrow();
+
+    // make sure note exists
+    await getNote(id: note.id);
+
+    // update db
+    final updatesCount = await db.update(noteTable, {
+      textColumn: text,
+      isSyncedWithCloudColumn: 0,
+    });
+    if (updatesCount == 0) {
+      throw CouldNotUpdateNote();
+    } else {
+      final updatedNote = await getNote(id: note.id);
+
+      // Update the note in the _notes list only if it's different
+      int index = _notes.indexWhere((note) => note.id == updatedNote.id);
+      if (index != -1) {
+        _notes[index] = updatedNote; // update the note
+        _notesStreamController.add(List.from(_notes)); // broadcast updated list
+      }
+
+      return updatedNote;
+    }
+  }
+
   Future<DatabaseNote> createNote({required DatabaseUser owner}) async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
 
-// make sure owner exists in the databse with correct id
+    // make sure owner exists in the database with the correct id
     final dbUser = await getUser(email: owner.email);
     if (dbUser != owner) {
       throw CouldNotFindUser();
@@ -147,8 +155,11 @@ class NotesService {
       isSyncedWithCloud: true,
     );
 
-    _notes.add(note);
-    _notesStreamController.add(_notes);
+    // Only add to the list if it doesn't already exist
+    if (_notes.every((existingNote) => existingNote.id != note.id)) {
+      _notes.add(note);
+      _notesStreamController.add(List.from(_notes)); // broadcast updated list
+    }
 
     return note;
   }
@@ -226,6 +237,7 @@ class NotesService {
     try {
       final docsPath = await getApplicationDocumentsDirectory();
       final dbPath = join(docsPath.path, dbName);
+      print('dbPath $dbPath ');
       final db = await openDatabase(dbPath);
       _db = db;
 
