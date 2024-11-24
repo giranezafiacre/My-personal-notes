@@ -229,6 +229,9 @@ class NotesService {
       final db = await openDatabase(dbPath);
       _db = db;
 
+      // Enable foreign key constraints
+      await db.execute('PRAGMA foreign_keys = ON');
+
       //  create user table
       await db.execute(createUserTable);
 

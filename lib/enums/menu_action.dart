@@ -1,2 +1,2 @@
 
-enum MenuAction { logout, add }
+enum MenuAction { logout }

@@ -36,7 +36,10 @@ class _NotesViewState extends State<NotesView> {
               onPressed: () {
                 Navigator.of(context).pushNamed(newNoteRoute);
               },
-              icon: const Icon(Icons.add,color: Colors.white,)),
+              icon: const Icon(
+                Icons.add,
+                color: Colors.white,
+              )),
           PopupMenuButton<MenuAction>(
             icon: const Icon(
               Icons.more_vert,
@@ -52,8 +55,6 @@ class _NotesViewState extends State<NotesView> {
                         .pushNamedAndRemoveUntil(loginRoute, (_) => false);
                   }
                   break;
-                // TODO: Handle this case.
-                case MenuAction.add:
                 // TODO: Handle this case.
               }
             },
@@ -89,9 +90,9 @@ class _NotesViewState extends State<NotesView> {
                         case ConnectionState.none:
                         // TODO: Handle this case.
                         case ConnectionState.waiting:
+                        case ConnectionState.active:
                           return Text('Waiting for all notes...');
 
-                        case ConnectionState.active:
                         // TODO: Handle this case.
                         case ConnectionState.done:
                         // TODO: Handle this case.
