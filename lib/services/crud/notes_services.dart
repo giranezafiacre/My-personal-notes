@@ -154,6 +154,7 @@ class NotesService {
       text: text,
       isSyncedWithCloud: true,
     );
+    
 
     // Only add to the list if it doesn't already exist
     if (_notes.every((existingNote) => existingNote.id != note.id)) {
@@ -291,7 +292,19 @@ class DatabaseNote {
     required this.text,
     required this.isSyncedWithCloud,
   });
-
+  // Add a copyWith method
+  DatabaseNote copyWith({
+    int? id,
+    String? text,
+    int? userId,
+  }) {
+    return DatabaseNote(
+      id: id ?? this.id,
+      text: text ?? this.text,
+      userId: userId ?? this.userId, 
+      isSyncedWithCloud: true,
+    );
+  }
   DatabaseNote.fromRow(Map<String, Object?> map)
       : id = map[idColumn] as int,
         userId = map[userIdColumn] as int,

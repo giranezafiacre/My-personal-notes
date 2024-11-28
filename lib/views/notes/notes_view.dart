@@ -3,6 +3,8 @@ import 'package:mypersonalnotes/constants/routes.dart';
 import 'package:mypersonalnotes/enums/menu_action.dart';
 import 'package:mypersonalnotes/services/auth/auth_service.dart';
 import 'package:mypersonalnotes/services/crud/notes_services.dart';
+import 'package:mypersonalnotes/utility/dialogs/logout_dialog.dart';
+import 'package:mypersonalnotes/views/notes/notes_list_view.dart';
 
 class NotesView extends StatefulWidget {
   const NotesView({super.key});
@@ -82,66 +84,42 @@ class _NotesViewState extends State<NotesView> {
                     builder: (context, snapshot) {
                       switch (snapshot.connectionState) {
                         case ConnectionState.none:
-                        // TODO: Handle this case.
+                          return const Center(child: Text('No connection.'));
                         case ConnectionState.waiting:
+                          return const Center(
+                              child: CircularProgressIndicator());
                         case ConnectionState.active:
                           if (snapshot.hasData) {
                             final allNotes =
                                 snapshot.data as List<DatabaseNote>;
-                            return ListView.builder(
-                              itemCount: allNotes.length,
-                              itemBuilder: (context, index) {
-                                final note = allNotes[index];
-                                return ListTile(
-                                  title: Text(
-                                    note.text,
-                                    maxLines:1,
-                                    softWrap: true,
-                                    overflow: TextOverflow.ellipsis,
-                                    ),
-                                );
-                              },
-                            );
+                            if (allNotes.isEmpty) {
+                              return const Center(
+                                  child: Text('No notes available.'));
+                            } else {
+                              print('allNotes: $allNotes');
+                              return NotesListView(
+                                notes: allNotes,
+                                onDeleteNote: (note) async {
+                                  await _notesService.deleteNote(id: note.id);
+                                },
+                              );
+                            }
                           } else {
                             return const Text('no notes');
                           }
 
                         // TODO: Handle this case.
                         case ConnectionState.done:
-                        // TODO: Handle this case.
+                          return const Center(child: Text('Stream closed.'));
                         default:
-                          return CircularProgressIndicator();
+                          return const Center(
+                              child: CircularProgressIndicator());
                       }
                     });
               default:
-                return CircularProgressIndicator();
+                return const CircularProgressIndicator();
             }
           }),
     );
   }
-}
-
-Future<bool> showLogoutDialog(BuildContext context) {
-  return showDialog<bool>(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('Sign out'),
-        content: const Text('Are you sure you want to signout?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: const Text('Logout'))
-        ],
-      );
-    },
-  ).then((value) => value ?? false);
 }
