@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:mypersonalnotes/constants/routes.dart';
 import 'package:mypersonalnotes/services/auth/auth_service.dart';
 import 'package:mypersonalnotes/views/login_view.dart';
-import 'package:mypersonalnotes/views/notes/new_note_view.dart';
+import 'package:mypersonalnotes/views/notes/create_update_note_view.dart';
 import 'package:mypersonalnotes/views/notes/notes_view.dart';
 import 'package:mypersonalnotes/views/register_view.dart';
 import 'package:mypersonalnotes/views/verify_email_view.dart';
 
-void main() {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
+  debugPrint('Firebase initialization started');
+  await AuthService.firebase().initialize(); 
+  debugPrint('Firebase initialization completed');
   runApp(MaterialApp(
     title: 'Flutter Demo',
     theme: ThemeData(
@@ -22,11 +25,10 @@ void main() {
       registerRoute: (context) => const RegisterView(),
       notesRoute: (context) => const NotesView(),
       verifyEmailRoute: (context) => const VerifyEmailView(),
-      newNoteRoute:(context)=>const NewNoteView()
+      createOrUpdateNoteRoute: (context) => const CreateUpdateNoteView()
     },
   ));
 }
-
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
