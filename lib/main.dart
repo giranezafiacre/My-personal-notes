@@ -7,10 +7,10 @@ import 'package:mypersonalnotes/views/notes/notes_view.dart';
 import 'package:mypersonalnotes/views/register_view.dart';
 import 'package:mypersonalnotes/views/verify_email_view.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   debugPrint('Firebase initialization started');
-  await AuthService.firebase().initialize(); 
+  await AuthService.firebase().initialize();
   debugPrint('Firebase initialization completed');
   runApp(MaterialApp(
     title: 'Flutter Demo',

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mypersonalnotes/services/cloud/cloud_note.dart';
-import 'package:mypersonalnotes/services/crud/notes_services.dart';
 import 'package:mypersonalnotes/utility/dialogs/delete_dialog.dart';
 
 typedef NoteCallback = void Function(CloudNote note);
@@ -11,11 +10,11 @@ class NotesListView extends StatelessWidget {
   final NoteCallback onTap;
 
   const NotesListView({
-    Key? key,
+    super.key,
     required this.notes,
     required this.onDeleteNote,
     required this.onTap,
-  }):super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
