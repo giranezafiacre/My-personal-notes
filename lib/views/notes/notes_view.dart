@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mypersonalnotes/constants/routes.dart';
 import 'package:mypersonalnotes/enums/menu_action.dart';
 import 'package:mypersonalnotes/services/auth/auth_service.dart';
+import 'package:mypersonalnotes/services/auth/bloc/auth_bloc.dart';
+import 'package:mypersonalnotes/services/auth/bloc/auth_event.dart';
 import 'package:mypersonalnotes/services/cloud/cloud_note.dart';
 import 'package:mypersonalnotes/services/cloud/firebase_cloud_storage.dart';
 import 'package:mypersonalnotes/utility/dialogs/logout_dialog.dart';
@@ -47,9 +50,10 @@ class _NotesViewState extends State<NotesView> {
                 case MenuAction.logout:
                   final shouldLogout = await showLogoutDialog(context);
                   if (shouldLogout) {
+                    context.read<AuthBloc>().add(
+                          const AuthEventLogout(),
+                        );
                     await AuthService.firebase().logout();
-                    Navigator.of(context)
-                        .pushNamedAndRemoveUntil(loginRoute, (_) => false);
                   }
                   break;
                 // TODO: Handle this case.
@@ -93,7 +97,8 @@ class _NotesViewState extends State<NotesView> {
                     return NotesListView(
                       notes: allNotes,
                       onDeleteNote: (note) async {
-                        await _notesService.deleteNote(documentId: note.documentId);
+                        await _notesService.deleteNote(
+                            documentId: note.documentId);
                       },
                       onTap: (note) => {
                         Navigator.of(context).pushNamed(
