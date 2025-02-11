@@ -4,6 +4,7 @@ import 'package:mypersonalnotes/constants/routes.dart';
 import 'package:mypersonalnotes/services/auth/auth_exceptions.dart';
 import 'package:mypersonalnotes/services/auth/bloc/auth_bloc.dart';
 import 'package:mypersonalnotes/services/auth/bloc/auth_event.dart';
+import 'package:mypersonalnotes/services/auth/bloc/auth_state.dart';
 import 'package:mypersonalnotes/utility/dialogs/error_dialog.dart';
 
 class LoginView extends StatefulWidget {
@@ -66,37 +67,30 @@ class _LoginViewState extends State<LoginView> {
             decoration:
                 const InputDecoration(hintText: 'Please enter you password'),
           ),
-          TextButton(
-            onPressed: () async {
-              final email = _email1.text;
-              final password = _password.text;
+          BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) async {
+              if (state is AuthStateLoggedOut) {
+                if (state.exception is UserNotFoundAuthException) {
+                  await showErrorDialog(context, 'User not found');
+                } else if (state.exception is WrongPasswordAuthException) {
+                  await showErrorDialog(context, 'Wrong credentials');
+                } else if (state.exception is GenericAuthException) {
+                  await showErrorDialog(context, 'Authentication error');
+                }
+              }
+            },
+            child: TextButton(
+              onPressed: () async {
+                final email = _email1.text;
+                final password = _password.text;
 
-              try {
                 context.read<AuthBloc>().add(AuthEventLogIn(
                       email,
                       password,
                     ));
-              } on UserNotFoundAuthException {
-                if (!context.mounted) return;
-                await showErrorDialog(
-                  context,
-                  'User Not Found',
-                );
-              } on WrongPasswordAuthException {
-                if (!context.mounted) return;
-                await showErrorDialog(
-                  context,
-                  'Wrong credentials',
-                );
-              } on GenericAuthException {
-                if (!mounted) return;
-                await showErrorDialog(
-                  context,
-                  'Error: Authentication error',
-                );
-              }
-            },
-            child: const Text('Login'),
+              },
+              child: const Text('Login'),
+            ),
           ),
           TextButton(
             onPressed: () {
