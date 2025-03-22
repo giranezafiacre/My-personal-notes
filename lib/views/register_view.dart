@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mypersonalnotes/constants/routes.dart';
 import 'package:mypersonalnotes/services/auth/auth_exceptions.dart';
 import 'package:mypersonalnotes/services/auth/auth_service.dart';
+import 'package:mypersonalnotes/services/auth/bloc/auth_bloc.dart';
+import 'package:mypersonalnotes/services/auth/bloc/auth_event.dart';
+import 'package:mypersonalnotes/services/auth/bloc/auth_state.dart';
 import 'package:mypersonalnotes/utility/dialogs/error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
@@ -33,93 +37,71 @@ class _RegisterViewState extends State<RegisterView> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Handle this case.
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Register',
-          style: TextStyle(
-            color: Color.fromARGB(255, 244, 245, 248), // Text color in AppBar
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) async {
+        if (state is AuthStateRegistering) {
+          if (state.exception is WeakPasswordAuthException) {
+            await showErrorDialog(context, 'Weak password');
+          } else if (state.exception is EmailArleadyInUseAuthException) {
+            await showErrorDialog(context, 'Email is already in use');
+          } else if (state.exception is GenericAuthException) {
+            await showErrorDialog(context, 'Failed to register');
+          } else if (state.exception is InvalidEmailAuthException) {
+            await showErrorDialog(context, 'Invalid email');
+          }
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'Register',
+            style: TextStyle(
+              color: Color.fromARGB(255, 244, 245, 248), // Text color in AppBar
+            ),
           ),
+          backgroundColor: const Color.fromARGB(255, 94, 117, 247),
         ),
-        backgroundColor: const Color.fromARGB(255, 94, 117, 247),
-      ),
-      body: Column(
-        children: [
-          TextField(
-            controller: _email1,
-            autocorrect: false,
-            keyboardType: TextInputType.emailAddress,
-            enableSuggestions: false,
-            decoration:
-                const InputDecoration(hintText: 'Please enter you email'),
-          ),
-          TextField(
-            controller: _password,
-            obscureText: true,
-            enableSuggestions: false,
-            autocorrect: false,
-            decoration:
-                const InputDecoration(hintText: 'Please enter you password'),
-          ),
-          TextButton(
-            onPressed: () async {
-              final email = _email1.text;
-              final password = _password.text;
-              try {
-                await AuthService.firebase()
-                    .createUser(email: email, password: password);
-                final user = AuthService.firebase().currentUser;
-                if(user?.isEmailVerified==false){
-                AuthService.firebase().sendEmailVerification();
-                // if(i)
-                Navigator.of(context)
-                    .pushNamedAndRemoveUntil(verifyEmailRoute, (_) => false);
-
-                }
-
-              } on WeakPasswordAuthException {
-                if (context.mounted) {
-                  await showErrorDialog(
-                    context,
-                    'Error: Weak Password}',
-                  );
-                }
-              } on EmailArleadyInUseAuthException {
-                if (context.mounted) {
-                  await showErrorDialog(
-                    context,
-                    'Error: email already in use',
-                  );
-                }
-              } on InvalidEmailAuthException {
-                if (context.mounted) {
-                  await showErrorDialog(
-                    context,
-                    'Error: invalid email',
-                  );
-                }
-              } on GenericAuthException {
-                if (context.mounted) {
-                  await showErrorDialog(
-                    context,
-                    'Error: Failed to register',
-                  );
-                }
-              } 
-            },
-            child: const Text('Register'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                loginRoute,
-                (route) => false,
-              );
-            },
-            child: const Text('Already Registered? Login here!'),
-          )
-        ],
+        body: Column(
+          children: [
+            TextField(
+              controller: _email1,
+              autocorrect: false,
+              keyboardType: TextInputType.emailAddress,
+              enableSuggestions: false,
+              decoration:
+                  const InputDecoration(hintText: 'Please enter you email'),
+            ),
+            TextField(
+              controller: _password,
+              obscureText: true,
+              enableSuggestions: false,
+              autocorrect: false,
+              decoration:
+                  const InputDecoration(hintText: 'Please enter you password'),
+            ),
+            TextButton(
+              onPressed: () async {
+                final email = _email1.text;
+                final password = _password.text;
+                context.read<AuthBloc>().add(
+                      AuthEventRegister(
+                        email,
+                        password,
+                      ),
+                    );
+              },
+              child: const Text('Register'),
+            ),
+            TextButton(
+              onPressed: () {
+                context.read<AuthBloc>().add(
+                  const AuthEventLogout(),
+                );
+              },
+              child: const Text('Already Registered? Login here!'),
+            )
+          ],
+        ),
       ),
     );
   }
