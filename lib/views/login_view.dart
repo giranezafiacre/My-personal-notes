@@ -105,7 +105,7 @@ class _LoginViewState extends State<LoginView> {
                         const AuthEventForgotPassword(),
                       );
                 },
-                child: const Text('Forgot password'),
+                child: const Text('Forgot password?'),
               ),
               TextButton(
                 onPressed: () {

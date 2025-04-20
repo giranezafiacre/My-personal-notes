@@ -39,6 +39,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
             await showPasswordResetSentDialog(context);
           }
           if (state.exception != null) {
+            // ignore: use_build_context_synchronously
             await showErrorDialog(context,
                 'We could not process your request. Please make sure that you are a registered user, or if not, register a user now by going back one step.');
           }
@@ -52,7 +53,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
           padding: const EdgeInsets.all(16.0),
           child: Column(children: [
             const Text(
-                'If you forgot your password, simply enter your email and we will send you a password'),
+                'If you forgot your password, simply enter your email and we will send you a password reset link'),
             TextField(
               keyboardType: TextInputType.emailAddress,
               autocorrect: false,
@@ -66,7 +67,8 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
               onPressed: () {
                 final email = _controller.text;
                 context.read<AuthBloc>().add(
-                    AuthEventForgotPassword(email: email));
+                      AuthEventForgotPassword(email: email),
+                    );
               },
               child: const Text('Send me password reset link'),
             ),
